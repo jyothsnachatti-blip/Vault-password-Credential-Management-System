@@ -1,0 +1,288 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: #0f1420;
+  color: #e6e9f0;
+}
+
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 380px;
+  background: #171c2c;
+  border: 1px solid #262d42;
+  border-radius: 12px;
+  padding: 32px;
+}
+
+.auth-card h1 {
+  margin: 0 0 4px;
+  font-size: 22px;
+}
+
+.auth-subtitle {
+  margin: 0 0 24px;
+  color: #8b93a7;
+  font-size: 14px;
+}
+
+.auth-error {
+  background: rgba(220, 38, 38, 0.12);
+  border: 1px solid rgba(220, 38, 38, 0.4);
+  color: #fca5a5;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+}
+
+label {
+  font-size: 13px;
+  margin: 12px 0 6px;
+  color: #b3b9c9;
+}
+
+input {
+  background: #0f1420;
+  border: 1px solid #2b3350;
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: #e6e9f0;
+  font-size: 14px;
+}
+
+input:focus {
+  outline: none;
+  border-color: #5b7cfa;
+}
+
+button {
+  margin-top: 20px;
+  background: #5b7cfa;
+  border: none;
+  border-radius: 8px;
+  padding: 11px;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.auth-footer {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 13px;
+  color: #8b93a7;
+}
+
+.auth-footer a {
+  color: #7f9cff;
+}
+/* Forgot Password Link */
+.forgot-password {
+  text-align: right;
+  margin-top: 10px;
+  margin-bottom: 20px;
+}
+
+.forgot-password a {
+  color: #7c8cff;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.forgot-password a:hover {
+  color: #9aa7ff;
+  text-decoration: underline;
+}
+.dashboard-page {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #0b1220;
+  color: #f8fafc;
+  padding: 20px;
+}
+
+.dashboard-card {
+  width: 100%;
+  max-width: 520px;
+  text-align: center;
+  background: #111827;
+  border: 1px solid #263449;
+  border-radius: 20px;
+  padding: 45px 35px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+}
+
+.dashboard-logo {
+  font-size: 55px;
+  margin-bottom: 10px;
+}
+
+.dashboard-card h1 {
+  margin: 0;
+  font-size: 38px;
+  letter-spacing: -1px;
+}
+
+.dashboard-subtitle {
+  color: #94a3b8;
+  margin-top: 10px;
+  margin-bottom: 35px;
+}
+
+.dashboard-welcome {
+  background: #172033;
+  border: 1px solid #263449;
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 25px;
+}
+
+.dashboard-welcome h2 {
+  margin: 0 0 8px;
+  font-size: 22px;
+}
+
+.dashboard-welcome p {
+  margin: 0;
+  color: #94a3b8;
+}
+
+.vault-button {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 10px;
+  background: #14b8a6;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+  margin-bottom: 12px;
+}
+
+.vault-button:hover {
+  background: #0d9488;
+  transform: translateY(-1px);
+}
+
+.logout-button {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #334155;
+  border-radius: 10px;
+  background: transparent;
+  color: #cbd5e1;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.logout-button:hover {
+  background: #172033;
+}
+
+.dashboard-loading {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #0b1220;
+  color: #94a3b8;
+  font-size: 18px;
+}
+.password-strength {
+  margin-top: 8px;
+  margin-bottom: 18px;
+}
+
+.strength-text {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.strength-text.weak {
+  color: #ef4444;
+}
+
+.strength-text.medium {
+  color: #f59e0b;
+}
+
+.strength-text.strong {
+  color: #22c55e;
+}
+
+.strength-bar {
+  width: 100%;
+  height: 6px;
+  background: #263449;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.strength-progress {
+  height: 100%;
+  border-radius: 10px;
+  transition: width 0.3s ease;
+}
+
+.strength-progress.weak {
+  width: 25%;
+  background: #ef4444;
+}
+
+.strength-progress.medium {
+  width: 65%;
+  background: #f59e0b;
+}
+
+.strength-progress.strong {
+  width: 100%;
+  background: #22c55e;
+}
+
+.password-requirements {
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.password-requirements p {
+  margin: 4px 0;
+}
+
+.password-requirements .valid {
+  color: #22c55e;
+}
+
+.password-requirements .invalid {
+  color: #ef4444;
+}

@@ -1,0 +1,107 @@
+.vault-container {
+  width: 90%;
+  margin: 40px auto;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.vault-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.add-btn {
+  background: #145eb8;
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.add-btn:hover {
+  background: #0d5394;
+}
+
+.search-box {
+  margin-bottom: 20px;
+}
+
+.search-box input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #263449;
+  border-radius: 6px;
+  background: #111827;
+  color: #f8fafc;
+  box-sizing: border-box;
+}
+
+.vault-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.vault-table th,
+.vault-table td {
+  border: 1px solid #263449;
+  padding: 12px;
+  text-align: left;
+  vertical-align: middle;
+  overflow: hidden;
+  word-wrap: break-word;
+}
+
+.vault-table th:nth-child(1),
+.vault-table td:nth-child(1) {
+  width: 20%;
+}
+
+.vault-table th:nth-child(2),
+.vault-table td:nth-child(2) {
+  width: 22%;
+}
+
+.vault-table th:nth-child(3),
+.vault-table td:nth-child(3) {
+  width: 20%;
+}
+
+.vault-table th:nth-child(4),
+.vault-table td:nth-child(4) {
+  width: 18%;
+}
+
+.vault-table th:nth-child(5),
+.vault-table td:nth-child(5) {
+  width: 20%;
+}
+
+.vault-table th {
+  background: #172033;
+  color: #c0cde1;
+}
+
+.vault-table td {
+  color: #e2e8f0;
+}
+
+.vault-table td:last-child {
+  white-space: nowrap;
+}
+
+.vault-table button {
+  margin-right: 6px;
+  padding: 7px 10px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  background: #146eb8;
+  color: white;
+}
+
+.vault-table button:hover {
+  background: #0d4a94;
+}
