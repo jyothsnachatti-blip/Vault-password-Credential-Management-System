@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   getVaultEntries,
   getSharedVaultEntries,
@@ -9,17 +10,24 @@ import {
 } from "../services/api";
 import "./Vault.css";
 
-function Vault() {
+function Vault({ initialPage = "home" }) {
+  const navigate = useNavigate();
   const [entries, setEntries] = useState([]);
-  const [showForm, setShowForm] = useState(false);
-  const [editingId, setEditingId] = useState(null);
-  const [visiblePasswords, setVisiblePasswords] = useState({});
-  const [searchTerm, setSearchTerm] = useState("");
-  const [passwordStrength, setPasswordStrength] = useState("");
-  const [showShareForm, setShowShareForm] = useState(false);
+
+  const [page, setPage] = useState(initialPage);
   const [selectedEntry, setSelectedEntry] = useState(null);
+
+  const [editingId, setEditingId] = useState(null);
+
+  const [visiblePassword, setVisiblePassword] = useState(false);
+  const [passwordStrength, setPasswordStrength] = useState("");
+
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const [showShareForm, setShowShareForm] = useState(false);
   const [shareEmail, setShareEmail] = useState("");
   const [sharePermission, setSharePermission] = useState("VIEW");
+  const [shareExpiryDate, setShareExpiryDate] = useState("");
 
   const [form, setForm] = useState({
     website: "",
@@ -56,15 +64,34 @@ function Vault() {
             permission: entry.permission || "VIEW",
           }));
         }
-      } catch (sharedError) {
-        console.error("Error loading shared credentials:", sharedError);
+      } catch (error) {
+        console.error(
+          "Error loading shared credentials:",
+          error
+        );
       }
 
       setEntries([...myEntries, ...sharedEntries]);
     } catch (error) {
-      console.error("Error loading vault entries:", error);
+      console.error(
+        "Error loading vault entries:",
+        error
+      );
+
       setEntries([]);
     }
+  };
+
+  const resetForm = () => {
+    setForm({
+      website: "",
+      username: "",
+      password: "",
+      notes: "",
+    });
+
+    setEditingId(null);
+    setPasswordStrength("");
   };
 
   const handleChange = (e) => {
@@ -86,23 +113,19 @@ function Vault() {
         alert("Credential added successfully!");
       }
 
-      setShowForm(false);
-      setEditingId(null);
+      resetForm();
 
-      setForm({
-        website: "",
-        username: "",
-        password: "",
-        notes: "",
-      });
-
-      setPasswordStrength("");
       await loadEntries();
+
+      setPage("credentials");
     } catch (error) {
       console.error(error);
 
       if (error.response) {
-        alert(error.response.data.message || "Operation failed");
+        alert(
+          error.response.data?.message ||
+            "Operation failed"
+        );
       } else {
         alert("Server error");
       }
@@ -121,52 +144,61 @@ function Vault() {
 
       alert("Credential deleted successfully");
 
+      setSelectedEntry(null);
+
       await loadEntries();
+
+      setPage("credentials");
     } catch (error) {
       console.error(error);
 
       if (error.response) {
-        alert(error.response.data.message || "Delete failed");
+        alert(
+          error.response.data?.message ||
+            "Delete failed"
+        );
       } else {
         alert("Server error");
       }
     }
   };
 
-  const handleEdit = (entry) => {
-    if (entry.isShared && entry.permission !== "EDIT") {
-      alert("You only have VIEW permission for this credential.");
+  const openAddPage = () => {
+    resetForm();
+    setPage("add");
+  };
+
+  const openCredential = (entry) => {
+    setSelectedEntry(entry);
+    setVisiblePassword(false);
+    setPage("details");
+  };
+
+  const openEdit = (entry) => {
+    if (
+      entry.isShared &&
+      entry.permission !== "EDIT"
+    ) {
+      alert(
+        "You only have VIEW permission for this credential."
+      );
       return;
     }
+
+    setSelectedEntry(entry);
 
     setEditingId(entry.id);
 
     setForm({
-      website: entry.website,
-      username: entry.username,
-      password: entry.password,
+      website: entry.website || "",
+      username: entry.username || "",
+      password: entry.password || "",
       notes: entry.notes || "",
     });
 
     setPasswordStrength("");
-    setShowForm(true);
-  };
 
-  const togglePasswordVisibility = (id) => {
-    setVisiblePasswords((prev) => ({
-      ...prev,
-      [id]: !prev[id],
-    }));
-  };
-
-  const copyPassword = async (password) => {
-    try {
-      await navigator.clipboard.writeText(password);
-      alert("Password copied successfully!");
-    } catch (error) {
-      console.error(error);
-      alert("Failed to copy password.");
-    }
+    setPage("edit");
   };
 
   const checkPasswordStrength = (password) => {
@@ -186,7 +218,10 @@ function Vault() {
       Number(hasNumber) +
       Number(hasSpecial);
 
-    if (password.length >= 8 && score === 4) {
+    if (
+      password.length >= 8 &&
+      score === 4
+    ) {
       setPasswordStrength("Strong");
     } else if (score >= 2) {
       setPasswordStrength("Medium");
@@ -196,10 +231,17 @@ function Vault() {
   };
 
   const generatePassword = () => {
-    const uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    const lowercase = "abcdefghijklmnopqrstuvwxyz";
-    const numbers = "0123456789";
-    const symbols = "!@#$%^&*()_+-=[]{}<>?";
+    const uppercase =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+    const lowercase =
+      "abcdefghijklmnopqrstuvwxyz";
+
+    const numbers =
+      "0123456789";
+
+    const symbols =
+      "!@#$%^&*()_+-=[]{}<>?";
 
     const allCharacters =
       uppercase +
@@ -211,26 +253,65 @@ function Vault() {
 
     for (let i = 0; i < 12; i++) {
       password += allCharacters.charAt(
-        Math.floor(Math.random() * allCharacters.length)
+        Math.floor(
+          Math.random() *
+            allCharacters.length
+        )
       );
     }
 
     setForm({
       ...form,
-      password: password,
+      password,
     });
 
     checkPasswordStrength(password);
   };
 
+  const copyPassword = async (password) => {
+    try {
+      await navigator.clipboard.writeText(
+        password
+      );
+
+      alert(
+        "Copied successfully!"
+      );
+    } catch (error) {
+      console.error(error);
+
+      alert(
+        "Failed to copy."
+      );
+    }
+  };
+
+  const openShare = (entry) => {
+    setSelectedEntry(entry);
+
+    setShareEmail("");
+
+    setSharePermission("VIEW");
+
+    setShareExpiryDate("");
+
+    setShowShareForm(true);
+  };
+
   const handleShare = async () => {
     if (!shareEmail.trim()) {
-      alert("Please enter the user's email.");
+      alert(
+        "Please enter the user's email."
+      );
+
       return;
     }
 
     if (!selectedEntry) {
-      alert("No credential selected.");
+      alert(
+        "No credential selected."
+      );
+
       return;
     }
 
@@ -238,7 +319,8 @@ function Vault() {
       await shareVaultEntry(
         selectedEntry.id,
         shareEmail.trim(),
-        sharePermission
+        sharePermission,
+        shareExpiryDate || null
       );
 
       alert(
@@ -246,13 +328,19 @@ function Vault() {
       );
 
       setShowShareForm(false);
-      setSelectedEntry(null);
+
       setShareEmail("");
+
       setSharePermission("VIEW");
+
+      setShareExpiryDate("");
 
       await loadEntries();
     } catch (error) {
-      console.error("Share error:", error);
+      console.error(
+        "Share error:",
+        error
+      );
 
       if (error.response) {
         alert(
@@ -260,373 +348,753 @@ function Vault() {
             "Failed to share credential."
         );
       } else {
-        alert("Server error.");
+        alert(
+          "Server error."
+        );
       }
     }
   };
 
-  const filteredEntries = entries.filter((entry) =>
-    (entry.website || "")
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase())
-  );
+  const filteredEntries =
+    entries.filter((entry) =>
+      (entry.website || "")
+        .toLowerCase()
+        .includes(
+          searchTerm.toLowerCase()
+        )
+    );
+
+  const goBack = () => {
+  if (page === "details") {
+    setPage("credentials");
+    setSelectedEntry(null);
+    return;
+  }
+
+  if (page === "edit") {
+    setPage("credentials");
+    setEditingId(null);
+    return;
+  }
+
+  navigate("/dashboard");
+};
 
   return (
     <div className="vault-container">
 
-      <h1>🔐 SecureVault</h1>
+      {/* HOME */}
 
-      <div className="vault-header">
-        <h2>Password Vault</h2>
+      {page === "home" && (
+        <>
+          <div className="vault-topbar">
+            <h1>Secure Vault</h1>
+          </div>
 
-        <button
-          className="add-btn"
-          onClick={() => {
-            setEditingId(null);
-
-            setForm({
-              website: "",
-              username: "",
-              password: "",
-              notes: "",
-            });
-
-            setPasswordStrength("");
-            setShowForm(true);
-          }}
-        >
-          + Add Credential
-        </button>
-      </div>
-
-      <div className="search-box">
-        <input
-          type="text"
-          placeholder="Search website..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-      </div>
-
-      {showForm && (
-        <div className="vault-form">
-          <h3>
-            {editingId ? "Edit Credential" : "Add Credential"}
-          </h3>
-
-          <form onSubmit={handleSubmit}>
-
-            <input
-              type="text"
-              name="website"
-              placeholder="Website"
-              value={form.website}
-              onChange={handleChange}
-              required
-            />
-
-            <input
-              type="text"
-              name="username"
-              placeholder="Username"
-              value={form.username}
-              onChange={handleChange}
-              required
-            />
-
-            <input
-              type="password"
-              name="password"
-              placeholder="Password"
-              value={form.password}
-              onChange={(e) => {
-                handleChange(e);
-                checkPasswordStrength(e.target.value);
-              }}
-              required
-            />
-
-            <button
-              type="button"
-              onClick={generatePassword}
-              style={{
-                marginTop: "10px",
-                marginBottom: "10px",
-                padding: "8px 15px",
-                cursor: "pointer",
-                backgroundColor: "#14b8a6",
-                color: "white",
-                border: "none",
-                borderRadius: "5px",
-              }}
-            >
-              🔐 Generate Password
-            </button>
-
-            {passwordStrength && (
-              <p
-                style={{
-                  color:
-                    passwordStrength === "Strong"
-                      ? "#22c55e"
-                      : passwordStrength === "Medium"
-                      ? "#f59e0b"
-                      : "#ef4444",
-                  fontWeight: "bold",
-                  marginTop: "5px",
-                }}
-              >
-                Password Strength: {passwordStrength}
-              </p>
-            )}
-
-            <textarea
-              name="notes"
-              placeholder="Notes"
-              value={form.notes}
-              onChange={handleChange}
-            />
-
-            <button type="submit">
-              {editingId ? "Update" : "Save"}
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                setShowForm(false);
-                setEditingId(null);
-
-                setForm({
-                  website: "",
-                  username: "",
-                  password: "",
-                  notes: "",
-                });
-
-                setPasswordStrength("");
-              }}
-            >
-              Cancel
-            </button>
-
-          </form>
-        </div>
-      )}
-
-      {showShareForm && selectedEntry && (
-        <div className="share-modal">
-          <div className="share-modal-content">
-
-            <h3>Share Credential</h3>
+          <div className="vault-welcome">
+            <h2>Welcome</h2>
 
             <p>
-              Share <strong>{selectedEntry.website}</strong>
+              Manage your credentials securely
+              in one place.
             </p>
+          </div>
 
-            <input
-              type="email"
-              placeholder="Enter user's email"
-              value={shareEmail}
-              onChange={(e) => setShareEmail(e.target.value)}
-            />
+          <div className="vault-main-actions">
 
-            <select
-              value={sharePermission}
-              onChange={(e) =>
-                setSharePermission(e.target.value)
+            <button
+              className="vault-action-card"
+              onClick={openAddPage}
+            >
+              <span className="action-title">
+                + Add Credential
+              </span>
+
+              <span className="action-description">
+                Save a new credential securely
+              </span>
+            </button>
+
+            <button
+              className="vault-action-card"
+              onClick={() =>
+                setPage("credentials")
               }
             >
-              <option value="VIEW">View only</option>
-              <option value="EDIT">View & Edit</option>
-            </select>
+              <span className="action-title">
+                View Credentials
+              </span>
 
-            <div className="share-actions">
+              <span className="action-description">
+                View and manage your saved
+                credentials
+              </span>
+            </button>
 
-              <button
-                type="button"
-                onClick={() => {
-                  setShowShareForm(false);
-                  setSelectedEntry(null);
-                  setShareEmail("");
-                  setSharePermission("VIEW");
+          </div>
+
+          <button
+            className="back-btn"
+            onClick={() =>
+              window.history.back()
+            }
+          >
+            Back
+          </button>
+        </>
+      )}
+
+      {/* ADD */}
+
+      {page === "add" && (
+        <div className="vault-inner-page">
+
+          <button
+            className="back-btn"
+            onClick={goBack}
+          >
+            Back
+          </button>
+
+          <div className="vault-form-card">
+
+            <h2>
+              Add Credential
+            </h2>
+
+            <p className="form-subtitle">
+              Save your credential securely.
+            </p>
+
+            <form
+              onSubmit={handleSubmit}
+            >
+
+              <label>
+                Website
+              </label>
+
+              <input
+                type="text"
+                name="website"
+                placeholder="Example: Gmail"
+                value={form.website}
+                onChange={handleChange}
+                required
+              />
+
+              <label>
+                Username
+              </label>
+
+              <input
+                type="text"
+                name="username"
+                placeholder="Username or email"
+                value={form.username}
+                onChange={handleChange}
+                required
+              />
+
+              <label>
+                Password
+              </label>
+
+              <input
+                type="password"
+                name="password"
+                placeholder="Enter password"
+                value={form.password}
+                onChange={(e) => {
+                  handleChange(e);
+                  checkPasswordStrength(
+                    e.target.value
+                  );
                 }}
-              >
-                Cancel
-              </button>
+                required
+              />
 
               <button
                 type="button"
-                onClick={handleShare}
+                className="generate-btn"
+                onClick={generatePassword}
               >
-                Share
+                Generate Password
               </button>
 
-            </div>
+              {passwordStrength && (
+                <p
+                  className={`password-strength ${passwordStrength.toLowerCase()}`}
+                >
+                  Password Strength:{" "}
+                  {passwordStrength}
+                </p>
+              )}
+
+              <label>
+                Notes
+              </label>
+
+              <textarea
+                name="notes"
+                placeholder="Optional notes"
+                value={form.notes}
+                onChange={handleChange}
+              />
+
+              <button
+                type="submit"
+                className="primary-btn"
+              >
+                Save Credential
+              </button>
+
+            </form>
 
           </div>
         </div>
       )}
 
-      <table className="vault-table">
+      {/* EDIT */}
 
-        <thead>
-          <tr>
-            <th>Website</th>
-            <th>Username</th>
-            <th>Password</th>
-            <th>Notes</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
+      {page === "edit" && (
+        <div className="vault-inner-page">
 
-        <tbody>
+          <button
+            className="back-btn"
+            onClick={goBack}
+          >
+            Back
+          </button>
 
-          {filteredEntries.length === 0 ? (
+          <div className="vault-form-card">
 
-            <tr>
-              <td
-                colSpan="5"
-                style={{ textAlign: "center" }}
+            <h2>
+              Edit Credential
+            </h2>
+
+            <p className="form-subtitle">
+              Update your credential details.
+            </p>
+
+            <form
+              onSubmit={handleSubmit}
+            >
+
+              <label>
+                Website
+              </label>
+
+              <input
+                type="text"
+                name="website"
+                value={form.website}
+                onChange={handleChange}
+                required
+              />
+
+              <label>
+                Username
+              </label>
+
+              <input
+                type="text"
+                name="username"
+                value={form.username}
+                onChange={handleChange}
+                required
+              />
+
+              <label>
+                Password
+              </label>
+
+              <input
+                type="password"
+                name="password"
+                value={form.password}
+                onChange={(e) => {
+                  handleChange(e);
+                  checkPasswordStrength(
+                    e.target.value
+                  );
+                }}
+                required
+              />
+
+              {passwordStrength && (
+                <p
+                  className={`password-strength ${passwordStrength.toLowerCase()}`}
+                >
+                  Password Strength:{" "}
+                  {passwordStrength}
+                </p>
+              )}
+
+              <label>
+                Notes
+              </label>
+
+              <textarea
+                name="notes"
+                value={form.notes}
+                onChange={handleChange}
+              />
+
+              <button
+                type="submit"
+                className="primary-btn"
               >
-                No credentials found
-              </td>
-            </tr>
+                Update Credential
+              </button>
 
-          ) : (
+            </form>
 
-            filteredEntries.map((entry) => (
+          </div>
+        </div>
+      )}
 
-              <tr key={`${entry.isShared ? "shared" : "own"}-${entry.id}`}>
+      {/* CREDENTIAL LIST */}
 
-                <td>
-                  {entry.isShared && (
-                    <div className="shared-badge">
-                      🔗 Shared · {entry.permission}
-                    </div>
-                  )}
+      {page === "credentials" && (
+        <div className="vault-inner-page">
 
-                  {entry.website}
-                </td>
+          <button
+            className="back-btn"
+            onClick={goBack}
+          >
+            Back
+          </button>
 
-                <td>
-                  {entry.username}
-                </td>
+          <div className="credentials-header">
 
-                <td>
+            <div>
+              <h2>
+                Saved Credentials
+              </h2>
 
-                  {visiblePasswords[entry.id]
-                    ? entry.password
-                    : "•".repeat(
-                        entry.password
-                          ? entry.password.length
-                          : 8
+              <p>
+                View your saved and shared
+                credentials.
+              </p>
+            </div>
+
+            <button
+              className="add-small-btn"
+              onClick={openAddPage}
+            >
+              + Add Credential
+            </button>
+
+          </div>
+
+          <div className="search-box">
+
+            <input
+              type="text"
+              placeholder="Search by website..."
+              value={searchTerm}
+              onChange={(e) =>
+                setSearchTerm(
+                  e.target.value
+                )
+              }
+            />
+
+          </div>
+
+          <div className="credential-list">
+
+            {filteredEntries.length === 0 ? (
+
+              <div className="empty-state">
+                No credentials found.
+              </div>
+
+            ) : (
+
+              filteredEntries.map(
+                (entry) => (
+
+                  <div
+                    className="credential-row"
+                    key={`${entry.isShared ? "shared" : "own"}-${entry.id}`}
+                  >
+
+                    <div className="credential-info">
+
+                      <div className="credential-name">
+                        {entry.website}
+                      </div>
+
+                      <div className="credential-username">
+                        {entry.username}
+                      </div>
+
+                      {entry.isShared && (
+                        <span className="shared-badge">
+                          Shared ·{" "}
+                          {entry.permission}
+                        </span>
                       )}
 
-                  <button
-                    onClick={() =>
-                      togglePasswordVisibility(entry.id)
-                    }
-                    style={{
-                      marginLeft: "10px",
-                      cursor: "pointer",
-                      border: "none",
-                      background: "transparent",
-                      fontSize: "16px",
-                    }}
-                  >
-                    {visiblePasswords[entry.id]
-                      ? "Hide"
-                      : "Show"}
-                  </button>
+                    </div>
+
+                    <button
+                      className="view-btn"
+                      onClick={() =>
+                        openCredential(
+                          entry
+                        )
+                      }
+                    >
+                      View
+                    </button>
+
+                  </div>
+
+                )
+              )
+
+            )}
+
+          </div>
+
+        </div>
+      )}
+
+      {/* DETAILS */}
+
+      {page === "details" &&
+        selectedEntry && (
+          <div className="vault-inner-page">
+
+            <button
+              className="back-btn"
+              onClick={goBack}
+            >
+              Back
+            </button>
+
+            <div className="credential-details-card">
+
+              <div className="details-header">
+
+                <div>
+
+                  <h2>
+                    {selectedEntry.website}
+                  </h2>
+
+                  {selectedEntry.isShared && (
+                    <span className="shared-badge">
+                      Shared ·{" "}
+                      {selectedEntry.permission}
+                    </span>
+                  )}
+
+                </div>
+
+              </div>
+
+              <div className="detail-field">
+
+                <label>
+                  Username
+                </label>
+
+                <div className="detail-value">
+
+                  <span>
+                    {selectedEntry.username}
+                  </span>
 
                   <button
                     onClick={() =>
-                      copyPassword(entry.password)
+                      copyPassword(
+                        selectedEntry.username
+                      )
                     }
-                    style={{
-                      marginLeft: "8px",
-                      cursor: "pointer",
-                      border: "none",
-                      background: "transparent",
-                      fontSize: "16px",
-                    }}
                   >
                     Copy
                   </button>
 
-                </td>
+                </div>
 
-                <td>
-                  {entry.notes || "-"}
-                </td>
+              </div>
 
-                <td>
+              <div className="detail-field">
 
-                  {entry.isShared ? (
+                <label>
+                  Password
+                </label>
 
-                    entry.permission === "EDIT" ? (
+                <div className="detail-value">
 
-                      <button
-                        onClick={() =>
-                          handleEdit(entry)
-                        }
-                      >
-                        Edit
-                      </button>
+                  <span>
+                    {visiblePassword
+                      ? selectedEntry.password
+                      : "•".repeat(
+                          selectedEntry.password
+                            ? selectedEntry.password.length
+                            : 8
+                        )}
+                  </span>
 
-                    ) : (
+                  <div className="detail-buttons">
 
-                      <span className="view-only-label">
-                        👁 View only
-                      </span>
+                    <button
+                      onClick={() =>
+                        setVisiblePassword(
+                          !visiblePassword
+                        )
+                      }
+                    >
+                      {visiblePassword
+                        ? "Hide"
+                        : "Show"}
+                    </button>
 
-                    )
+                    <button
+                      onClick={() =>
+                        copyPassword(
+                          selectedEntry.password
+                        )
+                      }
+                    >
+                      Copy
+                    </button>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+              <div className="detail-field">
+
+                <label>
+                  Website
+                </label>
+
+                <div className="detail-value">
+
+                  <span>
+                    {selectedEntry.website}
+                  </span>
+
+                </div>
+
+              </div>
+
+              <div className="detail-field">
+
+                <label>
+                  Notes
+                </label>
+
+                <div className="detail-notes">
+                  {selectedEntry.notes ||
+                    "No notes"}
+                </div>
+
+              </div>
+
+              <div className="details-actions">
+
+                {selectedEntry.isShared ? (
+
+                  selectedEntry.permission ===
+                  "EDIT" ? (
+
+                    <button
+                      className="edit-action"
+                      onClick={() =>
+                        openEdit(
+                          selectedEntry
+                        )
+                      }
+                    >
+                      Edit
+                    </button>
 
                   ) : (
 
-                    <>
-                      <button
-                        onClick={() =>
-                          handleEdit(entry)
-                        }
-                      >
-                        Edit
-                      </button>
+                    <span className="view-only-text">
+                      View Only
+                    </span>
 
-                      <button
-                        onClick={() => {
-                          setSelectedEntry(entry);
-                          setShareEmail("");
-                          setSharePermission("VIEW");
-                          setShowShareForm(true);
-                        }}
-                      >
-                        Share
-                      </button>
+                  )
 
-                      <button
-                        onClick={() =>
-                          handleDelete(entry.id)
-                        }
-                      >
-                        Delete
-                      </button>
-                    </>
+                ) : (
 
-                  )}
+                  <>
 
-                </td>
+                    <button
+                      className="edit-action"
+                      onClick={() =>
+                        openEdit(
+                          selectedEntry
+                        )
+                      }
+                    >
+                      Edit
+                    </button>
 
-              </tr>
+                    <button
+                      className="share-action"
+                      onClick={() =>
+                        openShare(
+                          selectedEntry
+                        )
+                      }
+                    >
+                      Share
+                    </button>
 
-            ))
+                    <button
+                      className="delete-action"
+                      onClick={() =>
+                        handleDelete(
+                          selectedEntry.id
+                        )
+                      }
+                    >
+                      Delete
+                    </button>
 
-          )}
+                  </>
 
-        </tbody>
+                )}
 
-      </table>
+              </div>
+
+            </div>
+
+          </div>
+        )}
+
+      {/* SHARE MODAL */}
+
+      {showShareForm &&
+        selectedEntry && (
+
+          <div className="share-modal-overlay">
+
+            <div className="share-modal">
+
+              <button
+                className="modal-close"
+                onClick={() => {
+                  setShowShareForm(false);
+                  setShareExpiryDate("");
+                }}
+              >
+                X
+              </button>
+
+              <h2>
+                Share Credential
+              </h2>
+
+              <p className="share-subtitle">
+                Share{" "}
+                <strong>
+                  {selectedEntry.website}
+                </strong>{" "}
+                with another registered user.
+              </p>
+
+              <label>
+                User Email
+              </label>
+
+              <input
+                type="email"
+                placeholder="Enter user's email"
+                value={shareEmail}
+                onChange={(e) =>
+                  setShareEmail(
+                    e.target.value
+                  )
+                }
+              />
+
+              <label>
+                Permission
+              </label>
+
+              <select
+                value={sharePermission}
+                onChange={(e) =>
+                  setSharePermission(
+                    e.target.value
+                  )
+                }
+              >
+
+                <option value="VIEW">
+                  View Only
+                </option>
+
+                <option value="EDIT">
+                  View & Edit
+                </option>
+
+              </select>
+
+              <label>
+                Expiry Date (Optional)
+              </label>
+
+              <input
+                type="date"
+                value={shareExpiryDate}
+                min={
+                  new Date()
+                    .toISOString()
+                    .split("T")[0]
+                }
+                onChange={(e) =>
+                  setShareExpiryDate(
+                    e.target.value
+                  )
+                }
+              />
+
+              <p className="expiry-help">
+                Leave empty if you don't want
+                the shared credential to expire.
+              </p>
+
+              <div className="share-modal-actions">
+
+                <button
+                  className="cancel-share-btn"
+                  onClick={() => {
+                    setShowShareForm(false);
+                    setShareEmail("");
+                    setSharePermission("VIEW");
+                    setShareExpiryDate("");
+                  }}
+                >
+                  Cancel
+                </button>
+
+                <button
+                  className="confirm-share-btn"
+                  onClick={handleShare}
+                >
+                  Share Credential
+                </button>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        )}
 
     </div>
   );

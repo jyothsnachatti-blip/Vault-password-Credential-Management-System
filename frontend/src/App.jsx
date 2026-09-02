@@ -8,14 +8,31 @@ import ResetPassword from "./pages/ResetPassword";
 import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Vault from "./pages/Vault";
+import LoginMonitoring from "./pages/LoginMonitoring";
+import SuspiciousActivity from "./pages/SuspiciousActivity";
+import SecurityAlerts from "./pages/SecurityAlerts";
+import AuditLogs from "./pages/AuditLogs";
+import SecurityAnalytics from "./pages/SecurityAnalytics";
+import Reports from "./pages/Reports";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
 
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+        {/* =========================
+            AUTHENTICATION
+        ========================= */}
+
+        <Route
+          path="/login"
+          element={<Login />}
+        />
+
+        <Route
+          path="/register"
+          element={<Register />}
+        />
 
         <Route
           path="/forgot-password"
@@ -31,23 +48,137 @@ function App() {
           path="/reset-password"
           element={<ResetPassword />}
         />
-       <Route
-  path="/dashboard"
-  element={
-    <ProtectedRoute>
-      <Dashboard />
-    </ProtectedRoute>
-  }
-/>
-<Route
-  path="/vault"
-  element={
-    <ProtectedRoute>
-      <Vault />
-    </ProtectedRoute>
-  }
-/>
-        <Route path="*" element={<Navigate to="/login" replace />} />
+
+
+        {/* =========================
+            DASHBOARD
+        ========================= */}
+
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+
+
+        {/* =========================
+            VAULT
+        ========================= */}
+
+        <Route
+          path="/vault"
+          element={
+            <Navigate
+              to="/dashboard"
+              replace
+            />
+          }
+        />
+
+        <Route
+          path="/vault/add"
+          element={
+            <ProtectedRoute>
+              <Vault initialPage="add" />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/vault/credentials"
+          element={
+            <ProtectedRoute>
+              <Vault initialPage="credentials" />
+            </ProtectedRoute>
+          }
+        />
+
+
+        {/* =========================
+            SECURITY
+        ========================= */}
+
+        <Route
+          path="/login-monitoring"
+          element={
+            <ProtectedRoute>
+              <LoginMonitoring />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/suspicious-activities"
+          element={
+            <ProtectedRoute>
+              <SuspiciousActivity />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/security-alerts"
+          element={
+            <ProtectedRoute>
+              <SecurityAlerts />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/audit-logs"
+          element={
+            <ProtectedRoute>
+              <AuditLogs />
+            </ProtectedRoute>
+          }
+        />
+
+
+        {/* =========================
+            SECURITY ANALYTICS
+        ========================= */}
+
+        <Route
+          path="/security-analytics"
+          element={
+            <ProtectedRoute>
+              <SecurityAnalytics />
+            </ProtectedRoute>
+          }
+        />
+
+
+        {/* =========================
+            SECURITY REPORTS
+        ========================= */}
+
+        <Route
+          path="/reports"
+          element={
+            <ProtectedRoute>
+              <Reports />
+            </ProtectedRoute>
+          }
+        />
+
+
+        {/* =========================
+            UNKNOWN ROUTES
+        ========================= */}
+
+        <Route
+          path="*"
+          element={
+            <Navigate
+              to="/login"
+              replace
+            />
+          }
+        />
 
       </Routes>
     </BrowserRouter>
