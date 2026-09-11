@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -21,6 +22,7 @@ public class VaultShareController {
             @PathVariable Long vaultEntryId,
             @RequestParam String sharedWithEmail,
             @RequestParam VaultShare.Permission permission,
+            @RequestParam(required = false) LocalDate expiryDate,
             Authentication authentication) {
 
         VaultShare share = vaultShareService.shareCredential(

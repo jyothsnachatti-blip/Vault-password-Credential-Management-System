@@ -1,5 +1,6 @@
 package com.securevault.service;
 
+import com.securevault.entity.NotificationType;
 import com.securevault.entity.User;
 import com.securevault.entity.VaultEntry;
 import com.securevault.entity.VaultShare;
@@ -18,6 +19,8 @@ public class VaultShareService {
     private final VaultShareRepository vaultShareRepository;
     private final VaultRepository vaultRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
+    private final EmailService emailService;
 
     public VaultShare shareCredential(
             Long vaultEntryId,
@@ -35,7 +38,8 @@ public class VaultShareService {
 
         User sharedWithUser = userRepository.findByEmail(sharedWithEmail)
                 .orElseThrow(() ->
-                        new IllegalArgumentException("User to share with not found"));
+                        new IllegalArgumentException(
+                                "User to share with not found"));
 
         if (!vaultEntry.getUser().getId().equals(owner.getId())) {
             throw new IllegalArgumentException(
@@ -56,6 +60,7 @@ public class VaultShareService {
 
         if (existingShare != null) {
             existingShare.setPermission(permission);
+
             return vaultShareRepository.save(existingShare);
         }
 
@@ -65,7 +70,38 @@ public class VaultShareService {
                 .permission(permission)
                 .build();
 
-        return vaultShareRepository.save(share);
+        VaultShare savedShare =
+                vaultShareRepository.save(share);
+
+        // =====================================================
+        // NOTIFICATION TO RECIPIENT
+        // =====================================================
+
+        String notificationMessage =
+                owner.getFullName()
+                        + " has shared a credential with you."
+                        + " Permission: "
+                        + permission;
+
+        notificationService.createNotification(
+                sharedWithUser.getId(),
+                NotificationType.CREDENTIAL_SHARED,
+                "Credential Shared With You",
+                notificationMessage
+        );
+
+        // =====================================================
+        // EMAIL TO RECIPIENT
+        // =====================================================
+
+        emailService.sendCredentialSharedNotification(
+                sharedWithUser.getEmail(),
+                sharedWithUser.getFullName(),
+                owner.getFullName(),
+                permission.toString()
+        );
+
+        return savedShare;
     }
 
     public List<VaultShare> getShares(

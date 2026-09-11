@@ -60,10 +60,26 @@ function Register() {
       localStorage.setItem("token", res.data.token);
       navigate("/login");
     } catch (err) {
-      setError(
-        err.response?.data?.message ||
-          "Registration failed. Please try again."
-      );
+      if (!err.response) {
+        setError(
+          "Unable to connect to server. Please try again later."
+        );
+      } else if (err.response.status === 400) {
+        setError(
+          err.response.data?.message ||
+            "Invalid registration details. Please check your information."
+        );
+      } else if (err.response.status === 409) {
+        setError(
+          err.response.data?.message ||
+            "An account with this email already exists."
+        );
+      } else {
+        setError(
+          err.response.data?.message ||
+            "Something went wrong. Please try again."
+        );
+      }
     } finally {
       setLoading(false);
     }
@@ -128,7 +144,11 @@ function Register() {
               </div>
 
               <div className="password-requirements">
-                <p className={passwordChecks.length ? "valid" : "invalid"}>
+                <p
+                  className={
+                    passwordChecks.length ? "valid" : "invalid"
+                  }
+                >
                   {passwordChecks.length ? "✓" : "✗"} At least 8 characters
                 </p>
 
@@ -176,7 +196,8 @@ function Register() {
         </form>
 
         <p className="auth-footer">
-          Already have an account? <Link to="/login">Log in</Link>
+          Already have an account?{" "}
+          <Link to="/login">Log in</Link>
         </p>
       </div>
     </div>

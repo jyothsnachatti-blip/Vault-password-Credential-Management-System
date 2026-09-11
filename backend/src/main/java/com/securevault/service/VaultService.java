@@ -10,6 +10,8 @@ import com.securevault.util.EncryptionUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import com.securevault.dto.SharedVaultResponse;
+
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -28,6 +30,7 @@ public class VaultService {
                         new IllegalArgumentException("User not found"));
 
         vaultEntry.setUser(user);
+
         vaultEntry.setPassword(
                 encryptionUtil.encrypt(vaultEntry.getPassword())
         );
@@ -62,13 +65,21 @@ public class VaultService {
         List<VaultShare> shares =
                 vaultShareRepository.findBySharedWithUser(user);
 
+        LocalDate today = LocalDate.now();
+
         return shares.stream()
+                .filter(share ->
+                        share.getExpiryDate() == null ||
+                                !share.getExpiryDate().isBefore(today)
+                )
                 .map(share -> {
 
                     VaultEntry entry = share.getVaultEntry();
 
                     String decryptedPassword =
-                            encryptionUtil.decrypt(entry.getPassword());
+                            encryptionUtil.decrypt(
+                                    entry.getPassword()
+                            );
 
                     return new SharedVaultResponse(
                             entry.getId(),
@@ -106,6 +117,11 @@ public class VaultService {
                                 vaultEntry,
                                 user
                         )
+                        .filter(share ->
+                                share.getExpiryDate() == null ||
+                                        !share.getExpiryDate()
+                                                .isBefore(LocalDate.now())
+                        )
                         .map(share ->
                                 share.getPermission()
                                         == VaultShare.Permission.EDIT
@@ -118,25 +134,35 @@ public class VaultService {
         }
 
         vaultEntry.setWebsite(updatedEntry.getWebsite());
+
         vaultEntry.setUsername(updatedEntry.getUsername());
+
         vaultEntry.setPassword(
-                encryptionUtil.encrypt(updatedEntry.getPassword())
+                encryptionUtil.encrypt(
+                        updatedEntry.getPassword()
+                )
         );
+
         vaultEntry.setNotes(updatedEntry.getNotes());
 
         return vaultRepository.save(vaultEntry);
     }
 
-    public void deleteEntry(Long id, String email) {
+    public void deleteEntry(
+            Long id,
+            String email) {
 
-        VaultEntry vaultEntry = vaultRepository.findById(id)
-                .orElseThrow(() ->
-                        new IllegalArgumentException(
-                                "Vault entry not found"));
+        VaultEntry vaultEntry =
+                vaultRepository.findById(id)
+                        .orElseThrow(() ->
+                                new IllegalArgumentException(
+                                        "Vault entry not found"));
 
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() ->
-                        new IllegalArgumentException("User not found"));
+        User user =
+                userRepository.findByEmail(email)
+                        .orElseThrow(() ->
+                                new IllegalArgumentException(
+                                        "User not found"));
 
         boolean isOwner =
                 vaultEntry.getUser().getId().equals(user.getId());

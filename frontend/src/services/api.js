@@ -1,11 +1,17 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://localhost:8080/api",
+  baseURL:
+    import.meta.env.VITE_API_URL || "http://localhost:8080/api",
+
   headers: {
     "Content-Type": "application/json",
   },
 });
+
+// =====================================================
+// AUTHENTICATION
+// =====================================================
 
 export const registerUser = (data) =>
   api.post("/auth/register", data);
@@ -28,6 +34,10 @@ export const getProfile = () =>
       Authorization: `Bearer ${localStorage.getItem("token")}`,
     },
   });
+
+// =====================================================
+// VAULT
+// =====================================================
 
 export const getVaultEntries = () =>
   api.get("/vault", {
@@ -64,54 +74,48 @@ export const deleteVaultEntry = (id) =>
     },
   });
 
-export const shareVaultEntry = (
-  id,
-  email,
-  permission,
-  expiryDate
-) => {
-  let url =
+// =====================================================
+// SECURE SHARING
+// =====================================================
+
+export const shareVaultEntry = (id, email, permission) =>
+  api.post(
     `/vault/${id}/share?sharedWithEmail=${encodeURIComponent(
       email
-    )}&permission=${permission}`;
+    )}&permission=${permission}`,
+    {},
+    {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    }
+  );
 
-  if (expiryDate) {
-    url += `&expiryDate=${expiryDate}`;
-  }
-
-  return api.post(url, {}, {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
-    },
-  });
-};
-
-
-/* =========================================================
-   SECURITY
-   ========================================================= */
-
-/* Login Monitoring */
+// =====================================================
+// LOGIN MONITORING
+// =====================================================
 
 export const getLoginActivities = () =>
-  api.get("/login-activities", {
+  api.get("/monitoring/login-activities", {
     headers: {
       Authorization: `Bearer ${localStorage.getItem("token")}`,
     },
   });
 
-
-/* Suspicious Activities */
+// =====================================================
+// SUSPICIOUS ACTIVITIES
+// =====================================================
 
 export const getSuspiciousActivities = () =>
-  api.get("/suspicious-activities", {
+  api.get("/monitoring/suspicious-activities", {
     headers: {
       Authorization: `Bearer ${localStorage.getItem("token")}`,
     },
   });
 
-
-/* Security Alerts */
+// =====================================================
+// SECURITY ALERTS
+// =====================================================
 
 export const getSecurityAlerts = () =>
   api.get("/security-alerts", {
@@ -120,8 +124,20 @@ export const getSecurityAlerts = () =>
     },
   });
 
+export const markSecurityAlertAsRead = (id) =>
+  api.put(
+    `/security-alerts/${id}/read`,
+    {},
+    {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    }
+  );
 
-/* Audit Logs */
+// =====================================================
+// AUDIT LOGS
+// =====================================================
 
 export const getAuditLogs = () =>
   api.get("/audit-logs", {
@@ -130,8 +146,9 @@ export const getAuditLogs = () =>
     },
   });
 
-
-/* Security Analytics */
+// =====================================================
+// SECURITY ANALYTICS
+// =====================================================
 
 export const getSecurityAnalytics = () =>
   api.get("/security-analytics", {
@@ -140,11 +157,9 @@ export const getSecurityAnalytics = () =>
     },
   });
 
-/* =========================================================
-   REPORTS
-   ========================================================= */
-
-/* Password Health Report */
+// =====================================================
+// SECURITY REPORTS
+// =====================================================
 
 export const getPasswordHealthReport = () =>
   api.get("/reports/password-health", {
@@ -153,14 +168,44 @@ export const getPasswordHealthReport = () =>
     },
   });
 
-
-/* Login Activity Report */
-
 export const getLoginActivityReport = () =>
   api.get("/reports/login-activity", {
     headers: {
       Authorization: `Bearer ${localStorage.getItem("token")}`,
     },
   });
-  
+
+// =====================================================
+// NOTIFICATIONS
+// =====================================================
+
+export const getNotifications = () =>
+  api.get("/notifications", {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  });
+
+export const getUnreadNotificationCount = () =>
+  api.get("/notifications/unread/count", {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  });
+
+export const markNotificationAsRead = (id) =>
+  api.put(
+    `/notifications/${id}/read`,
+    {},
+    {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    }
+  );
+
+// =====================================================
+// DEFAULT EXPORT
+// =====================================================
+
 export default api;

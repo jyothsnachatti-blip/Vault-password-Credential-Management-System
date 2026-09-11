@@ -6,13 +6,13 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "security_alerts")
+@Table(name = "login_activities")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class SecurityAlert {
+public class LoginActivity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,17 +23,11 @@ public class SecurityAlert {
     private User user;
 
     @Column(nullable = false)
-    private String alertType;
-
-    @Column(nullable = false)
-    private String message;
-
-    @Column(nullable = false)
-    private String severity;
-
-    @Column(nullable = false)
-    private LocalDateTime createdAt;
+    private String email;
 
     @Column(nullable = false)
     private String status;
+
+    @Column(nullable = false)
+    private LocalDateTime loginTime;
 }

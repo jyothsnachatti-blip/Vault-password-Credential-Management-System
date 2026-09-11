@@ -31,6 +31,7 @@ public class User {
     // Stores a BCrypt hash, never the plain-text password.
     @Column(nullable = false)
     private String password;
+
     @Column(name = "otp")
     private String otp;
 
@@ -40,8 +41,15 @@ public class User {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    // Stores when the password was last changed.
+    @Column(name = "password_updated_at")
+    private LocalDateTime passwordUpdatedAt;
+
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
+
+        // New accounts start with the current password date.
+        this.passwordUpdatedAt = LocalDateTime.now();
     }
 }

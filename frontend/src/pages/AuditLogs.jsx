@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getAuditLogs } from "../services/api";
+import "./AuditLogs.css";
 
 function AuditLogs() {
   const navigate = useNavigate();

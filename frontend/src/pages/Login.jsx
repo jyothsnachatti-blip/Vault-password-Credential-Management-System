@@ -20,9 +20,18 @@ function Login() {
     try {
       const res = await loginUser(form);
       localStorage.setItem("token", res.data.token);
-      navigate("/dashboard"); // build this page next — it doesn't exist yet
+      navigate("/dashboard");
     } catch (err) {
-      setError(err.response?.data?.message || "Invalid email or password");
+      if (!err.response) {
+        setError("Unable to connect to server. Please try again later.");
+      } else if (err.response.status === 401) {
+        setError("Invalid email or password");
+      } else {
+        setError(
+          err.response.data?.message ||
+          "Something went wrong. Please try again."
+        );
+      }
     } finally {
       setLoading(false);
     }
@@ -32,7 +41,9 @@ function Login() {
     <div className="auth-page">
       <div className="auth-card">
         <h1>Welcome back</h1>
-        <p className="auth-subtitle">Log in to your SecureVault account</p>
+        <p className="auth-subtitle">
+          Log in to your SecureVault account
+        </p>
 
         {error && <div className="auth-error">{error}</div>}
 
@@ -56,9 +67,10 @@ function Login() {
             onChange={handleChange}
             required
           />
+
           <div className="forgot-password">
-  <Link to="/forgot-password">Forgot Password?</Link>
-</div>
+            <Link to="/forgot-password">Forgot Password?</Link>
+          </div>
 
           <button type="submit" disabled={loading}>
             {loading ? "Logging in..." : "Log in"}
@@ -66,7 +78,8 @@ function Login() {
         </form>
 
         <p className="auth-footer">
-          Don't have an account? <Link to="/register">Create one</Link>
+          Don't have an account?{" "}
+          <Link to="/register">Create one</Link>
         </p>
       </div>
     </div>

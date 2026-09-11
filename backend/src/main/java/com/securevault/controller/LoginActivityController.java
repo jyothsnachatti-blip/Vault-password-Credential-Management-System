@@ -1,27 +1,28 @@
 package com.securevault.controller;
 
-import com.securevault.entity.SuspiciousActivity;
+import com.securevault.entity.LoginActivity;
 import com.securevault.entity.User;
+import com.securevault.repository.LoginActivityRepository;
 import com.securevault.repository.UserRepository;
-import com.securevault.service.SuspiciousActivityService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/monitoring")
 @RequiredArgsConstructor
-@CrossOrigin
-public class SuspiciousActivityController {
+public class LoginActivityController {
 
-    private final SuspiciousActivityService suspiciousActivityService;
+    private final LoginActivityRepository loginActivityRepository;
     private final UserRepository userRepository;
 
-    @GetMapping("/suspicious-activities")
-    public ResponseEntity<List<SuspiciousActivity>> getSuspiciousActivities(
+    @GetMapping("/login-activities")
+    public ResponseEntity<List<LoginActivity>> getLoginActivities(
             Authentication authentication
     ) {
 
@@ -32,8 +33,8 @@ public class SuspiciousActivityController {
                 );
 
         return ResponseEntity.ok(
-                suspiciousActivityService
-                        .getUserSuspiciousActivities(user)
+                loginActivityRepository
+                        .findByUserOrderByLoginTimeDesc(user)
         );
     }
 }

@@ -1,17 +1,23 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getProfile } from "../services/api";
+import {
+  getProfile,
+  getUnreadNotificationCount,
+} from "../services/api";
 
 function Dashboard() {
   const navigate = useNavigate();
 
   const [profile, setProfile] = useState(null);
+  const [unreadCount, setUnreadCount] = useState(0);
+
   const [showSecurity, setShowSecurity] = useState(false);
   const [showCredentials, setShowCredentials] = useState(false);
   const [showAnalytics, setShowAnalytics] = useState(false);
 
   useEffect(() => {
     fetchProfile();
+    fetchUnreadNotificationCount();
   }, []);
 
   const fetchProfile = async () => {
@@ -19,9 +25,29 @@ function Dashboard() {
       const response = await getProfile();
       setProfile(response.data);
     } catch (error) {
+      console.error("Failed to load profile:", error);
       localStorage.removeItem("token");
       navigate("/login");
     }
+  };
+
+  const fetchUnreadNotificationCount = async () => {
+    try {
+      const response = await getUnreadNotificationCount();
+
+      setUnreadCount(response.data || 0);
+    } catch (error) {
+      console.error(
+        "Failed to load notification count:",
+        error
+      );
+
+      setUnreadCount(0);
+    }
+  };
+
+  const handleNotificationClick = () => {
+    navigate("/notifications");
   };
 
   const handleLogout = () => {
@@ -60,30 +86,106 @@ function Dashboard() {
 
       <div className="dashboard-card">
 
-        {/* LOGO */}
+        {/* =====================================================
+            HEADER
+        ===================================================== */}
 
-        <div className="dashboard-logo">
-          🔐
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "flex-start",
+            gap: "20px",
+          }}
+        >
+
+          {/* LOGO */}
+
+          <div>
+            <div className="dashboard-logo">
+              🔐
+            </div>
+
+            <h1>SecureVault</h1>
+
+            {/* WELCOME */}
+
+            <div className="dashboard-welcome">
+              <h2>
+                Welcome, {profile.fullName}
+              </h2>
+            </div>
+          </div>
+
+
+          {/* =====================================================
+              NOTIFICATION BELL
+          ===================================================== */}
+
+          <button
+            onClick={handleNotificationClick}
+            title="View Notifications"
+            style={{
+              position: "relative",
+              border: "1px solid #e5e7eb",
+              background: "#ffffff",
+              borderRadius: "12px",
+              width: "52px",
+              height: "52px",
+              cursor: "pointer",
+              fontSize: "26px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow:
+                "0 4px 12px rgba(0, 0, 0, 0.08)",
+              transition: "0.2s ease",
+              flexShrink: 0,
+            }}
+          >
+            🔔
+
+            {/* UNREAD COUNT */}
+
+            {unreadCount > 0 && (
+              <span
+                style={{
+                  position: "absolute",
+                  top: "-7px",
+                  right: "-7px",
+                  minWidth: "22px",
+                  height: "22px",
+                  padding: "0 5px",
+                  borderRadius: "50%",
+                  background: "#ef4444",
+                  color: "#ffffff",
+                  fontSize: "11px",
+                  fontWeight: "700",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  border: "2px solid #ffffff",
+                  boxSizing: "border-box",
+                }}
+              >
+                {unreadCount > 99 ? "99+" : unreadCount}
+              </span>
+            )}
+          </button>
+
         </div>
 
-        <h1>SecureVault</h1>
 
-
-        {/* WELCOME */}
-
-        <div className="dashboard-welcome">
-          <h2>
-            Welcome, {profile.fullName}
-          </h2>
-        </div>
-
-
-        {/* ================= MAIN FEATURES ================= */}
+        {/* =====================================================
+            MAIN FEATURES
+        ===================================================== */}
 
         <div className="dashboard-features">
 
 
-          {/* ================= SECURITY ================= */}
+          {/* =====================================================
+              SECURITY
+          ===================================================== */}
 
           <div className="dashboard-menu">
 
@@ -274,7 +376,9 @@ function Dashboard() {
           </div>
 
 
-          {/* ================= CREDENTIALS ================= */}
+          {/* =====================================================
+              CREDENTIALS
+          ===================================================== */}
 
           <div className="dashboard-menu">
 
@@ -393,7 +497,9 @@ function Dashboard() {
           </div>
 
 
-          {/* ================= SECURITY ANALYTICS ================= */}
+          {/* =====================================================
+              SECURITY ANALYTICS
+          ===================================================== */}
 
           <div className="dashboard-menu">
 
@@ -432,6 +538,7 @@ function Dashboard() {
             {showAnalytics && (
 
               <div className="dashboard-submenu">
+
 
                 {/* ANALYTICS DASHBOARD */}
 
@@ -514,7 +621,9 @@ function Dashboard() {
         </div>
 
 
-        {/* ================= LOGOUT ================= */}
+        {/* =====================================================
+            LOGOUT
+        ===================================================== */}
 
         <button
           className="logout-button"

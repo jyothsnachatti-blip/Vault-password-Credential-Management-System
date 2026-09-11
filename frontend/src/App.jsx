@@ -14,6 +14,7 @@ import SecurityAlerts from "./pages/SecurityAlerts";
 import AuditLogs from "./pages/AuditLogs";
 import SecurityAnalytics from "./pages/SecurityAnalytics";
 import Reports from "./pages/Reports";
+import Notifications from "./pages/Notifications";
 
 function App() {
   return (
@@ -161,6 +162,20 @@ function App() {
           element={
             <ProtectedRoute>
               <Reports />
+            </ProtectedRoute>
+          }
+        />
+
+
+        {/* =========================
+            NOTIFICATIONS
+        ========================= */}
+
+        <Route
+          path="/notifications"
+          element={
+            <ProtectedRoute>
+              <Notifications />
             </ProtectedRoute>
           }
         />

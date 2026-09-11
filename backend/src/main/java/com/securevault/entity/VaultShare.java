@@ -3,6 +3,8 @@ package com.securevault.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
+
 @Entity
 @Table(name = "vault_shares")
 @Getter
@@ -27,6 +29,9 @@ public class VaultShare {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Permission permission;
+
+    @Column(name = "expiry_date")
+    private LocalDate expiryDate;
 
     public enum Permission {
         VIEW,

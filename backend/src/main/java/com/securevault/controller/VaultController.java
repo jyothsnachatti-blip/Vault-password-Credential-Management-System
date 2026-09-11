@@ -1,12 +1,14 @@
 package com.securevault.controller;
 
+import com.securevault.dto.SharedVaultResponse;
 import com.securevault.entity.VaultEntry;
 import com.securevault.service.VaultService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import com.securevault.dto.SharedVaultResponse;
+
 import java.util.List;
 
 @RestController
@@ -19,10 +21,13 @@ public class VaultController {
     @PostMapping
     public ResponseEntity<VaultEntry> addEntry(
             Authentication authentication,
-            @RequestBody VaultEntry vaultEntry) {
+            @Valid @RequestBody VaultEntry vaultEntry) {
 
         return ResponseEntity.ok(
-                vaultService.addEntry(authentication.getName(), vaultEntry)
+                vaultService.addEntry(
+                        authentication.getName(),
+                        vaultEntry
+                )
         );
     }
 
@@ -31,13 +36,16 @@ public class VaultController {
             Authentication authentication) {
 
         return ResponseEntity.ok(
-                vaultService.getAllEntries(authentication.getName())
+                vaultService.getAllEntries(
+                        authentication.getName()
+                )
         );
     }
+
     @PutMapping("/{id}")
     public ResponseEntity<VaultEntry> updateEntry(
             @PathVariable Long id,
-            @RequestBody VaultEntry vaultEntry,
+            @Valid @RequestBody VaultEntry vaultEntry,
             Authentication authentication) {
 
         return ResponseEntity.ok(
@@ -48,6 +56,7 @@ public class VaultController {
                 )
         );
     }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteEntry(
             @PathVariable Long id,
@@ -62,6 +71,7 @@ public class VaultController {
                 "Credential deleted successfully"
         );
     }
+
     @GetMapping("/shared")
     public ResponseEntity<List<SharedVaultResponse>> getSharedEntries(
             Authentication authentication) {

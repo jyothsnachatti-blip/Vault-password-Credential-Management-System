@@ -1290,14 +1290,17 @@ button:disabled {
     width: auto;
   }
 
+ @media (max-width: 800px) {
+
   .login-activity-table th,
   .login-activity-table td,
   .monitoring-table th,
   .monitoring-table td {
     padding: 12px 14px;
-    white-space: nowrap;
+    white-space: normal;
+    word-break: break-word;
   }
-
+}
   .suspicious-page {
     padding: 20px 12px;
   }

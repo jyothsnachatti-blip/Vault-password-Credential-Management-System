@@ -155,7 +155,7 @@
   color: #f87171;
 }
 
-@media (max-width: 700px) {
+@media (max-width:700px) {
   .login-monitoring-page {
     width: 94%;
     margin: 20px auto;
@@ -170,6 +170,59 @@
   }
 
   .login-activity-table {
-    min-width: 700px;
+    width: 100%;
+    min-width: 0;
+    table-layout: fixed;
+  }
+
+  .login-activity-table th,
+  .login-activity-table td {
+    padding: 10px 6px;
+    font-size: 12px;
+    vertical-align: middle;
+  }
+
+  /* ID */
+  .login-activity-table th:nth-child(1),
+  .login-activity-table td:nth-child(1) {
+    width: 10%;
+    white-space: nowrap;
+  }
+
+  /* Email */
+  .login-activity-table th:nth-child(2),
+  .login-activity-table td:nth-child(2) {
+    width: 32%;
+  }
+
+  /* Status */
+  .login-activity-table th:nth-child(3),
+  .login-activity-table td:nth-child(3) {
+    width: 23%;
+    white-space: nowrap;
+  }
+
+  /* Login Time */
+  .login-activity-table th:nth-child(4),
+  .login-activity-table td:nth-child(4) {
+    width: 35%;
+    white-space: normal;
+    word-break: normal;
+  }
+
+  .activity-email {
+    word-break: break-word;
+  }
+
+  .activity-time {
+    white-space: normal !important;
+    word-break: normal;
+  }
+
+  .login-status {
+    min-width: 0;
+    padding: 6px 5px;
+    font-size: 11px;
+    white-space: nowrap;
   }
 }

@@ -1,6 +1,7 @@
 package com.securevault.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -17,10 +18,13 @@ public class VaultEntry {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "Website is required")
     private String website;
 
+    @NotBlank(message = "Username is required")
     private String username;
 
+    @NotBlank(message = "Password is required")
     private String password;
 
     private String notes;
