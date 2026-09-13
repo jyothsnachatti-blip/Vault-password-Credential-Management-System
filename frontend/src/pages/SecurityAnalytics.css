@@ -211,13 +211,15 @@
   width: 100%;
   max-width: 100%;
   overflow-x: auto;
-  box-sizing: border-box;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
 }
 
 .analytics-table {
-  width: 100%;
-  border-collapse: collapse;
-  table-layout: fixed;
+  width: max-content;
+  min-width: 600px;
+  max-width: none;
+  table-layout: auto;
 }
 
 .analytics-table th {
@@ -529,21 +531,23 @@
     width: 100%;
     max-width: 100%;
     overflow-x: hidden;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
   }
 
   .analytics-table {
-    width: 100%;
-    min-width: 0;
-    max-width: 100%;
-    table-layout: fixed;
+    width: max-content;
+    min-width: 600px;
+    max-width: none;
+    table-layout: auto;
   }
 
   .analytics-table th,
   .analytics-table td {
-    white-space: normal;
-    overflow: hidden;
-    overflow-wrap: anywhere;
-    word-break: break-word;
+    white-space: nowrap;
+    overflow: visible;
+    overflow-wrap: normal;
+    word-break: normal;
     box-sizing: border-box;
     vertical-align: top;
   }

